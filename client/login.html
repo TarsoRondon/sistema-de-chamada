@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | Marca-Ponto Escolar</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="auth-page">
+    <div class="auth-card">
+      <div class="brand"><span class="brand-dot"></span> Marca-Ponto Escolar</div>
+      <h1>Acesso ao sistema</h1>
+      <p class="subtitle">Admin e professor acessam por email/senha com sessao segura.</p>
+
+      <form id="login-form" class="grid">
+        <div>
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="professor@escola.com" required />
+        </div>
+
+        <div>
+          <label for="password">Senha</label>
+          <input id="password" type="password" placeholder="********" required />
+        </div>
+
+        <div>
+          <label for="organization">ID da organizacao (opcional)</label>
+          <input id="organization" type="number" placeholder="1" />
+        </div>
+
+        <button class="btn-primary" type="submit">Entrar</button>
+      </form>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/login.js"></script>
+  </body>
+</html>

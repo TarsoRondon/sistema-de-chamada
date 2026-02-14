@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Totem | Marca-Ponto Escolar</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="topbar">
+        <div>
+          <div class="title">Modo Totem (QR/Manual)</div>
+          <div class="meta">Uso administrativo para contingencia sem leitor fisico.</div>
+        </div>
+        <div class="toolbar">
+          <a class="btn-secondary" href="/admin.html">Voltar ao admin</a>
+          <button id="kiosk-logout" class="btn-danger" type="button">Sair</button>
+        </div>
+      </section>
+
+      <section class="cards">
+        <article class="card">
+          <h3>Registrar evento</h3>
+          <form id="kiosk-form" class="grid">
+            <div>
+              <label>Matricula</label>
+              <input id="kiosk-matricula" placeholder="2025001" required />
+            </div>
+
+            <div class="grid cols-2">
+              <button class="btn-primary" data-event="IN" type="button" id="kiosk-in">Entrada (IN)</button>
+              <button class="btn-secondary" data-event="OUT" type="button" id="kiosk-out">Saida (OUT)</button>
+            </div>
+
+            <div>
+              <label>Metodo</label>
+              <select id="kiosk-method">
+                <option value="MANUAL">MANUAL</option>
+                <option value="QR">QR</option>
+                <option value="RFID">RFID</option>
+              </select>
+            </div>
+          </form>
+        </article>
+
+        <article class="card">
+          <h3>Ultimos eventos</h3>
+          <div class="feed-list" id="kiosk-feed"></div>
+        </article>
+      </section>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/kiosk.js"></script>
+  </body>
+</html>

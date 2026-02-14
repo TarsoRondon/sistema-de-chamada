@@ -1,0 +1,215 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin | Marca-Ponto Escolar</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="topbar">
+        <div>
+          <div class="title">Painel Administrativo</div>
+          <div class="meta" id="admin-user-meta">Carregando usuario...</div>
+        </div>
+        <div class="toolbar">
+          <a class="btn-secondary" href="/teacher.html">Diario do Professor</a>
+          <a class="btn-secondary" href="/kiosk.html">Modo Totem</a>
+          <button id="btn-logout" class="btn-danger" type="button">Sair</button>
+        </div>
+      </section>
+
+      <div class="tabs" id="admin-tabs">
+        <button class="tab-btn active" data-tab="students" type="button">Alunos</button>
+        <button class="tab-btn" data-tab="turmas" type="button">Turmas</button>
+        <button class="tab-btn" data-tab="devices" type="button">Dispositivos</button>
+        <button class="tab-btn" data-tab="logs" type="button">Logs</button>
+      </div>
+
+      <section class="tab-panel active" id="tab-students">
+        <div class="cards">
+          <article class="card">
+            <h3>Novo aluno</h3>
+            <form id="student-create-form" class="grid">
+              <div class="grid cols-2">
+                <div>
+                  <label>Matricula</label>
+                  <input id="student-matricula" required />
+                </div>
+                <div>
+                  <label>Turma</label>
+                  <select id="student-turma" required></select>
+                </div>
+              </div>
+              <div>
+                <label>Nome</label>
+                <input id="student-nome" required />
+              </div>
+              <button class="btn-primary" type="submit">Salvar aluno</button>
+            </form>
+          </article>
+
+          <article class="card">
+            <h3>Busca</h3>
+            <form id="student-filter-form" class="grid">
+              <div class="grid cols-2">
+                <div>
+                  <label>Turma</label>
+                  <select id="filter-turma">
+                    <option value="">Todas</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Matricula</label>
+                  <input id="filter-matricula" />
+                </div>
+              </div>
+              <div>
+                <label>Nome</label>
+                <input id="filter-nome" />
+              </div>
+              <button class="btn-secondary" type="submit">Filtrar</button>
+            </form>
+          </article>
+        </div>
+
+        <article class="card" style="margin-top: 14px">
+          <h3>Lista de alunos</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Matricula</th>
+                <th>Nome</th>
+                <th>Turma</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="students-table-body"></tbody>
+          </table>
+        </article>
+      </section>
+
+      <section class="tab-panel" id="tab-turmas">
+        <div class="cards">
+          <article class="card">
+            <h3>Nova turma</h3>
+            <form id="turma-create-form" class="grid">
+              <div>
+                <label>Nome</label>
+                <input id="turma-nome" placeholder="1A" required />
+              </div>
+              <div>
+                <label>Turno</label>
+                <select id="turma-turno" required>
+                  <option value="MANHA">MANHA</option>
+                  <option value="TARDE">TARDE</option>
+                  <option value="NOITE">NOITE</option>
+                </select>
+              </div>
+              <button class="btn-primary" type="submit">Criar turma</button>
+            </form>
+          </article>
+
+          <article class="card">
+            <h3>Turmas cadastradas</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nome</th>
+                  <th>Turno</th>
+                </tr>
+              </thead>
+              <tbody id="turmas-table-body"></tbody>
+            </table>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-devices">
+        <div class="cards">
+          <article class="card">
+            <h3>Novo dispositivo</h3>
+            <form id="device-create-form" class="grid">
+              <div>
+                <label>Codigo</label>
+                <input id="device-code" placeholder="LEITOR-PORTARIA-01" required />
+              </div>
+              <div>
+                <label>Local</label>
+                <input id="device-local" placeholder="Portaria" required />
+              </div>
+              <div>
+                <label>Secret (opcional)</label>
+                <input id="device-secret" placeholder="gerado automaticamente se vazio" />
+              </div>
+              <button class="btn-primary" type="submit">Cadastrar dispositivo</button>
+            </form>
+            <p class="subtitle" id="device-secret-out"></p>
+          </article>
+
+          <article class="card">
+            <h3>Dispositivos cadastrados</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Codigo</th>
+                  <th>Local</th>
+                  <th>Ativo</th>
+                </tr>
+              </thead>
+              <tbody id="devices-table-body"></tbody>
+            </table>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-logs">
+        <div class="cards">
+          <article class="card">
+            <div class="toolbar">
+              <button id="btn-refresh-logs" class="btn-secondary" type="button">Atualizar logs</button>
+            </div>
+            <h3>Eventos recentes</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Quando</th>
+                  <th>Aluno</th>
+                  <th>Evento</th>
+                  <th>Metodo</th>
+                  <th>Status</th>
+                  <th>Dispositivo</th>
+                </tr>
+              </thead>
+              <tbody id="logs-events-body"></tbody>
+            </table>
+          </article>
+
+          <article class="card">
+            <h3>Fila de sincronizacao</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Status</th>
+                  <th>Tentativas</th>
+                  <th>Proximo retry</th>
+                  <th>Ultimo erro</th>
+                </tr>
+              </thead>
+              <tbody id="logs-sync-body"></tbody>
+            </table>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/admin.js"></script>
+  </body>
+</html>

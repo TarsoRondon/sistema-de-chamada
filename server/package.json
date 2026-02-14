@@ -1,7 +1,7 @@
-﻿{
+{
   "name": "school-attendance-server",
   "version": "1.0.0",
-  "description": "Sistema de entrada/saída escolar integrado ao diário",
+  "description": "Sistema de entrada/saida escolar integrado ao diario",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

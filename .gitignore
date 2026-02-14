@@ -1,0 +1,4 @@
+﻿server/node_modules
+server/.env
+server/npm-debug.log*
+server/.DS_Store
