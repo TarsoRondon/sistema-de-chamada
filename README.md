@@ -5,6 +5,17 @@ Projeto full-stack (Node/Express + MySQL + frontend puro) para registro de `IN/O
 1. `DEVICE POST MODE`: dispositivo envia direto para `POST /api/device/events` com HMAC.
 2. `LOCAL AGENT MODE`: script Node (`agent/localAgent.js`) roda no PC do leitor e faz POST na API.
 
+## Padrao profissional aplicado
+
+- Configuracao centralizada e validada em `server/src/config/env.js`
+- Seguranca HTTP com `helmet` + compressao de resposta
+- Rate limiting nas rotas de login, device events e rotas internas
+- Endpoint de sessao `GET /api/auth/me` para o frontend validar role
+- Health checks separados:
+  - `GET /health/live` (liveness)
+  - `GET /health/ready` (readiness + DB)
+- Shutdown gracioso do servidor (SIGINT/SIGTERM)
+
 ## Estrutura
 
 ```text
@@ -65,6 +76,8 @@ mysql -u root -p school_attendance < src/db/seed.sql
 npm run dev
 ```
 
+Se voce alterou `PORT` no `.env`, troque a porta nos exemplos abaixo.
+
 5. (Opcional) Rode o mock diary server para testes de integracao:
 
 ```bash
@@ -103,6 +116,41 @@ cd server
 npm test
 ```
 
+## Importacao do CSV de digital
+
+Tabela criada para esse arquivo: `importacao_digital_eventos`.
+
+Script SQL da tabela:
+- `server/src/db/importacao_digital_eventos.sql`
+
+Importador automatico (Node):
+
+```bash
+cd server
+npm run import:digital-csv
+```
+
+Para informar outro caminho de CSV:
+
+```bash
+cd server
+node scripts/importDigitalCsv.js "C:\\caminho\\arquivo.csv"
+```
+
+Sincronizar alunos importados para a tabela oficial `students`:
+
+```bash
+cd server
+npm run sync:students-from-import
+```
+
+Reparar schema caso a tabela `students` tenha sido renomeada/trocada por engano:
+
+```bash
+cd server
+npm run repair:students-rename
+```
+
 ## Exemplos de requisicoes (curl)
 
 ### 1) Login (professor/admin)
@@ -111,6 +159,12 @@ npm test
 curl -i -c cookies.txt -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"prof@escola.com","password":"teacher123","organization_id":1}'
+```
+
+### 1.1) Ver sessao atual
+
+```bash
+curl -b cookies.txt http://localhost:3000/api/auth/me
 ```
 
 ### 2) Abrir aula (teacher)

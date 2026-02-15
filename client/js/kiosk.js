@@ -59,13 +59,26 @@
     document.getElementById('kiosk-out').addEventListener('click', () => sendEvent('OUT'));
 
     document.getElementById('kiosk-logout').addEventListener('click', async () => {
-      await Api.request('/api/auth/logout', { method: 'POST' });
+      try {
+        await Api.request('/api/auth/logout', { method: 'POST' });
+      } catch {
+        // session may already be expired
+      }
       window.location.href = '/login.html';
     });
   }
 
   async function bootstrap() {
     try {
+      const user = await Api.getSession();
+      if (user.role !== 'ADMIN') {
+        UI.showToast('Acesso permitido apenas para admin.', 'error');
+        setTimeout(() => {
+          window.location.href = '/teacher.html';
+        }, 1000);
+        return;
+      }
+
       bind();
       await loadFeed();
       setInterval(() => {
@@ -86,3 +99,4 @@
 
   bootstrap();
 })();
+

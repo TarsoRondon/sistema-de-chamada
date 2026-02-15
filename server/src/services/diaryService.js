@@ -1,7 +1,8 @@
-﻿const { logError, logInfo } = require('../utils/logger');
+﻿const config = require('../config/env');
+const { logError, logInfo } = require('../utils/logger');
 
 function buildDiaryUrl() {
-  const baseUrl = String(process.env.DIARY_BASE_URL || '').replace(/\/$/, '');
+  const baseUrl = String(config.diary.baseUrl || '').replace(/\/$/, '');
   if (!baseUrl) {
     const error = new Error('DIARY_BASE_URL nao configurada');
     error.statusCode = 500;
@@ -13,7 +14,7 @@ function buildDiaryUrl() {
 
 async function sendAttendance(payload) {
   const url = buildDiaryUrl();
-  const token = process.env.DIARY_TOKEN;
+  const token = config.diary.token;
 
   if (!token) {
     const error = new Error('DIARY_TOKEN nao configurado');
@@ -21,9 +22,8 @@ async function sendAttendance(payload) {
     throw error;
   }
 
-  const timeoutMs = Number(process.env.DIARY_TIMEOUT_MS || 5000);
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const timeout = setTimeout(() => controller.abort(), config.diary.timeoutMs);
 
   try {
     const response = await fetch(url, {

@@ -3,6 +3,7 @@
   if (!page) return;
 
   const state = {
+    sessionUser: null,
     turmas: [],
     students: [],
     devices: [],
@@ -27,6 +28,14 @@
         if (panel) panel.classList.add('active');
       });
     });
+  }
+
+  function renderUserMeta() {
+    const text = state.sessionUser
+      ? `${state.sessionUser.nome} (${state.sessionUser.role}) | organizacao ${state.sessionUser.organizationId}`
+      : 'Sessao ativa';
+
+    document.getElementById('admin-user-meta').textContent = text;
   }
 
   function renderTurmaOptions() {
@@ -225,13 +234,29 @@
     });
 
     document.getElementById('btn-logout').addEventListener('click', async () => {
-      await Api.request('/api/auth/logout', { method: 'POST' });
+      try {
+        await Api.request('/api/auth/logout', { method: 'POST' });
+      } catch {
+        // session may already be expired
+      }
       window.location.href = '/login.html';
     });
   }
 
   async function bootstrap() {
     try {
+      const user = await Api.getSession();
+      if (user.role !== 'ADMIN') {
+        UI.showToast('Acesso permitido apenas para admin.', 'error');
+        setTimeout(() => {
+          window.location.href = '/teacher.html';
+        }, 1000);
+        return;
+      }
+
+      state.sessionUser = user;
+      renderUserMeta();
+
       setupTabs();
       bindForms();
 
@@ -239,8 +264,6 @@
       await loadStudents();
       await loadDevices();
       await loadLogs();
-
-      document.getElementById('admin-user-meta').textContent = `Sessao admin ativa em ${new Date().toLocaleString('pt-BR')}`;
     } catch (error) {
       if (error.status === 401 || error.status === 403) {
         UI.showToast('Sessao expirada. Faca login novamente.', 'error');
@@ -256,3 +279,4 @@
 
   bootstrap();
 })();
+

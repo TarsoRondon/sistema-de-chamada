@@ -3,6 +3,7 @@
   if (!table) return;
 
   const state = {
+    sessionUser: null,
     turmas: [],
     sessions: [],
     activeSessionId: null,
@@ -231,20 +232,34 @@
     });
 
     document.getElementById('teacher-logout').addEventListener('click', async () => {
-      await Api.request('/api/auth/logout', { method: 'POST' });
+      try {
+        await Api.request('/api/auth/logout', { method: 'POST' });
+      } catch {
+        // session may already be expired
+      }
       window.location.href = '/login.html';
     });
   }
 
   async function bootstrap() {
     try {
+      const user = await Api.getSession();
+      if (!['ADMIN', 'TEACHER'].includes(user.role)) {
+        UI.showToast('Perfil sem acesso ao diario.', 'error');
+        setTimeout(() => {
+          window.location.href = '/login.html';
+        }, 900);
+        return;
+      }
+
+      state.sessionUser = user;
+      document.getElementById('teacher-user-meta').textContent = `${user.nome} (${user.role}) | organizacao ${user.organizationId}`;
+
       bindActions();
       await loadTurmas();
       await loadSessions();
       await loadFeed();
       startPollingFallback();
-
-      document.getElementById('teacher-user-meta').textContent = `Sessao ativa em ${new Date().toLocaleString('pt-BR')}`;
     } catch (error) {
       if (error.status === 401 || error.status === 403) {
         UI.showToast('Sessao expirada. Redirecionando para login.', 'error');
@@ -260,3 +275,4 @@
 
   bootstrap();
 })();
+

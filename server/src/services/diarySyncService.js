@@ -1,4 +1,5 @@
-﻿const pool = require('../db/pool');
+﻿const config = require('../config/env');
+const pool = require('../db/pool');
 const { sendAttendance } = require('./diaryService');
 const { logError, logInfo, logWarn } = require('../utils/logger');
 
@@ -73,7 +74,6 @@ async function processQueueItem(item) {
   } catch (error) {
     const attempts = Number(item.attempts || 0) + 1;
     const backoffMinutes = calculateBackoffMinutes(attempts);
-    const maxAttempts = Number(process.env.SYNC_MAX_ATTEMPTS || 10);
 
     await pool.query(
       `
@@ -88,7 +88,7 @@ async function processQueueItem(item) {
       [attempts, error.message, backoffMinutes, item.id]
     );
 
-    if (attempts >= maxAttempts) {
+    if (attempts >= config.sync.maxAttempts) {
       await pool.query(
         `
           UPDATE attendance_events
@@ -135,7 +135,7 @@ async function processQueueItemById(queueId) {
 }
 
 async function runDiarySyncOnce(limit) {
-  const batchSize = Number(limit || process.env.SYNC_BATCH_SIZE || 100);
+  const batchSize = Number(limit || config.sync.batchSize);
 
   const [items] = await pool.query(
     `
@@ -177,18 +177,17 @@ function startDiarySyncWorker() {
     return workerTimer;
   }
 
-  const intervalMs = Number(process.env.SYNC_INTERVAL_MS || 60000);
   workerTimer = setInterval(() => {
     runDiarySyncOnce().catch((error) => {
       logError('diary_worker_cycle_error', { message: error.message });
     });
-  }, intervalMs);
+  }, config.sync.intervalMs);
 
   if (typeof workerTimer.unref === 'function') {
     workerTimer.unref();
   }
 
-  logInfo('diary_worker_started', { intervalMs });
+  logInfo('diary_worker_started', { intervalMs: config.sync.intervalMs });
   return workerTimer;
 }
 

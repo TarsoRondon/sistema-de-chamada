@@ -1,6 +1,6 @@
-﻿const { loginWithEmailAndPassword } = require('../services/authService');
-
-const cookieName = process.env.COOKIE_NAME || 'auth_token';
+﻿const config = require('../config/env');
+const { loginWithEmailAndPassword } = require('../services/authService');
+const { getAuthCookieOptions } = require('../utils/cookies');
 
 async function login(req, res) {
   const { email, password, organization_id: organizationId } = req.body;
@@ -15,27 +15,22 @@ async function login(req, res) {
     organizationId,
   });
 
-  res.cookie(cookieName, token, {
-    httpOnly: true,
-    secure: String(process.env.COOKIE_SECURE || 'false') === 'true',
-    sameSite: 'lax',
-    maxAge: 8 * 60 * 60 * 1000,
-  });
+  res.cookie(config.jwt.cookieName, token, getAuthCookieOptions());
 
   return res.json({ ok: true, user });
 }
 
-function logout(req, res) {
-  res.clearCookie(cookieName, {
-    httpOnly: true,
-    secure: String(process.env.COOKIE_SECURE || 'false') === 'true',
-    sameSite: 'lax',
-  });
+function me(req, res) {
+  return res.json({ ok: true, user: req.user });
+}
 
+function logout(req, res) {
+  res.clearCookie(config.jwt.cookieName, getAuthCookieOptions());
   return res.json({ ok: true });
 }
 
 module.exports = {
   login,
+  me,
   logout,
 };

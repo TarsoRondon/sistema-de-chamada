@@ -2,6 +2,11 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
+
+const config = require('./config/env');
+const pool = require('./db/pool');
 
 const { requestIdMiddleware } = require('./middlewares/requestIdMiddleware');
 const { accessLogMiddleware } = require('./middlewares/accessLogMiddleware');
@@ -15,8 +20,55 @@ const internalRoutes = require('./routes/internalRoutes');
 
 const app = express();
 
+if (config.trustProxy) {
+  app.set('trust proxy', 1);
+}
+
+app.disable('x-powered-by');
+
 app.use(requestIdMiddleware);
 app.use(accessLogMiddleware);
+app.use(compression());
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        'script-src': ["'self'"],
+        'style-src': ["'self'", 'https://fonts.googleapis.com', "'unsafe-inline'"],
+        'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        'img-src': ["'self'", 'data:'],
+        'connect-src': ["'self'"],
+      },
+    },
+  })
+);
+
+const allowedOrigins = config.corsAllowedOrigins;
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.length === 0 || allowedOrigins.includes('*')) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      const corsError = new Error('Origem CORS nao permitida');
+      corsError.statusCode = 403;
+      corsError.publicMessage = 'Origem nao permitida';
+      return callback(corsError);
+    },
+    credentials: true,
+  })
+);
 
 app.use(
   express.json({
@@ -28,15 +80,31 @@ app.use(
 );
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-  })
-);
 
-app.get('/health', (req, res) => {
+app.get('/health/live', (req, res) => {
   res.json({ ok: true, service: 'school-attendance-api', now: new Date().toISOString() });
+});
+
+app.get('/health/ready', async (req, res, next) => {
+  try {
+    await pool.query('SELECT 1 AS ok');
+    res.json({ ok: true, db: 'up', now: new Date().toISOString() });
+  } catch (error) {
+    error.statusCode = 503;
+    error.publicMessage = 'Servico indisponivel';
+    next(error);
+  }
+});
+
+app.get('/health', async (req, res, next) => {
+  try {
+    await pool.query('SELECT 1 AS ok');
+    res.json({ ok: true, service: 'school-attendance-api', db: 'up', now: new Date().toISOString() });
+  } catch (error) {
+    error.statusCode = 503;
+    error.publicMessage = 'Servico indisponivel';
+    next(error);
+  }
 });
 
 app.use('/api/auth', authRoutes);

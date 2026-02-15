@@ -1,4 +1,10 @@
-﻿INSERT INTO organizations (id, nome)
+CREATE DATABASE IF NOT EXISTS school_attendance
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE school_attendance;
+
+INSERT INTO organizations (id, nome)
 VALUES (1, 'Escola Modelo')
 ON DUPLICATE KEY UPDATE nome = VALUES(nome);
 

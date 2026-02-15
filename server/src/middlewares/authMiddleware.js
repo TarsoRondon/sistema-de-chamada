@@ -1,9 +1,8 @@
-﻿const { verifyToken } = require('../utils/jwt');
-
-const cookieName = process.env.COOKIE_NAME || 'auth_token';
+﻿const config = require('../config/env');
+const { verifyToken } = require('../utils/jwt');
 
 function readToken(req) {
-  return req.cookies?.[cookieName] || null;
+  return req.cookies?.[config.jwt.cookieName] || null;
 }
 
 function optionalAuth(req, res, next) {
@@ -16,7 +15,7 @@ function optionalAuth(req, res, next) {
     const payload = verifyToken(token);
     req.user = payload;
     return next();
-  } catch (error) {
+  } catch {
     return next();
   }
 }
@@ -31,7 +30,7 @@ function requireAuth(req, res, next) {
     const payload = verifyToken(token);
     req.user = payload;
     return next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ ok: false, error: 'Sessao invalida ou expirada' });
   }
 }
@@ -56,7 +55,7 @@ function requireInternalOrAdmin(req, res, next) {
     return next();
   }
 
-  if (key && process.env.INTERNAL_API_KEY && key === process.env.INTERNAL_API_KEY) {
+  if (key && config.internalApiKey && key === config.internalApiKey) {
     return next();
   }
 
