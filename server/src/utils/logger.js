@@ -1,4 +1,4 @@
-﻿function writeLog(level, event, metadata = {}) {
+function writeLog(level, event, metadata = {}) {
   const payload = {
     timestamp: new Date().toISOString(),
     level,

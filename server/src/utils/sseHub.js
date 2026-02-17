@@ -1,4 +1,4 @@
-﻿const clients = new Map();
+const clients = new Map();
 let clientCounter = 0;
 
 function addSseClient({ res, organizationId, turmaId }) {

@@ -1,12 +1,25 @@
-﻿const { logError } = require('../utils/logger');
+const { logError } = require('../utils/logger');
+const { buildErrorPayload } = require('../utils/errorResponse');
 
 function notFoundMiddleware(req, res) {
-  res.status(404).json({ ok: false, error: 'Rota nao encontrada' });
+  res.status(404).json(buildErrorPayload(req, 'ROUTE_NOT_FOUND', 'Rota nao encontrada'));
 }
 
 function errorMiddleware(error, req, res, next) {
-  const mappedStatusCode = error.code === 'ER_DUP_ENTRY' ? 409 : Number(error.statusCode || 500);
-  const publicMessage = error.code === 'ER_DUP_ENTRY' ? 'Registro duplicado' : error.publicMessage || error.message;
+  const duplicate = error.code === 'ER_DUP_ENTRY';
+  const fileTooLarge = error.code === 'LIMIT_FILE_SIZE';
+
+  const mappedStatusCode = duplicate ? 409 : fileTooLarge ? 413 : Number(error.statusCode || 500);
+  const publicCode = duplicate
+    ? 'DUPLICATE_RECORD'
+    : fileTooLarge
+    ? 'FILE_TOO_LARGE'
+    : error.publicCode || 'INTERNAL_ERROR';
+  const publicMessage = duplicate
+    ? 'Registro duplicado'
+    : fileTooLarge
+    ? 'Arquivo excede o tamanho maximo permitido'
+    : error.publicMessage || error.message || 'Erro interno';
 
   const statusCode = mappedStatusCode;
   logError('request_error', {
@@ -20,10 +33,7 @@ function errorMiddleware(error, req, res, next) {
     return next(error);
   }
 
-  res.status(statusCode).json({
-    ok: false,
-    error: publicMessage || 'Erro interno',
-  });
+  return res.status(statusCode).json(buildErrorPayload(req, publicCode, publicMessage, error.details));
 }
 
 module.exports = {

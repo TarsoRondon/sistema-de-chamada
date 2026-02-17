@@ -1,5 +1,7 @@
-﻿const { getActiveDeviceByCode } = require('../services/deviceService');
+const { getActiveDeviceByCode } = require('../services/deviceService');
 const { verifyHmac } = require('../utils/hmac');
+const { sendError } = require('../utils/errorResponse');
+const { logWarn } = require('../utils/logger');
 
 async function deviceAuthMiddleware(req, res, next) {
   try {
@@ -7,19 +9,21 @@ async function deviceAuthMiddleware(req, res, next) {
     const signature = req.headers['x-signature'];
 
     if (!deviceCode || !signature) {
-      return res.status(401).json({ ok: false, error: 'Headers de autenticacao do dispositivo ausentes' });
+      return sendError(res, req, 401, 'DEVICE_AUTH_HEADERS_MISSING', 'Headers de autenticacao do dispositivo ausentes');
     }
 
     const device = await getActiveDeviceByCode(String(deviceCode));
     if (!device) {
-      return res.status(401).json({ ok: false, error: 'Dispositivo invalido ou inativo' });
+      logWarn('device_auth_invalid_device', { requestId: req.requestId, deviceCode: String(deviceCode) });
+      return sendError(res, req, 401, 'DEVICE_INVALID', 'Dispositivo invalido ou inativo');
     }
 
     const rawBody = req.rawBody || JSON.stringify(req.body || {});
     const isValid = verifyHmac(rawBody, device.secret, String(signature));
 
     if (!isValid) {
-      return res.status(401).json({ ok: false, error: 'Assinatura invalida' });
+      logWarn('device_auth_invalid_signature', { requestId: req.requestId, deviceCode: device.device_code });
+      return sendError(res, req, 401, 'DEVICE_SIGNATURE_INVALID', 'Assinatura invalida');
     }
 
     req.device = device;

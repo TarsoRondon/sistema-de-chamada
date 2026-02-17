@@ -1,4 +1,4 @@
-﻿const crypto = require('crypto');
+const crypto = require('crypto');
 
 const pool = require('../db/pool');
 const { createQueueEntryWithConnection, processQueueItemById } = require('./diarySyncService');
@@ -40,8 +40,12 @@ function normalizeEventTime(input) {
   return date;
 }
 
-function buildUniqueKey({ organizationId, studentId, deviceId, eventType, eventTimeIso, method }) {
-  const base = `${organizationId}|${studentId}|${deviceId || 'NONE'}|${eventType}|${eventTimeIso}|${method}`;
+function toIsoSecondPrecision(date) {
+  return `${date.toISOString().slice(0, 19)}Z`;
+}
+
+function buildUniqueKey({ organizationId, matricula, deviceCode, eventType, eventTimeIso }) {
+  const base = `${organizationId}|${deviceCode || 'NONE'}|${matricula}|${eventType}|${eventTimeIso}`;
   return crypto.createHash('sha256').update(base).digest('hex');
 }
 
@@ -181,13 +185,13 @@ async function processIncomingEvent({
       throw error;
     }
 
+    const eventTimeIsoForKey = toIsoSecondPrecision(normalizedEventTime);
     const uniqueKey = buildUniqueKey({
       organizationId: effectiveOrganizationId,
-      studentId: student.id,
-      deviceId: device?.id || null,
+      matricula: student.matricula,
+      deviceCode: device?.device_code || null,
       eventType: normalizedEventType,
-      eventTimeIso: normalizedEventTime.toISOString(),
-      method: normalizedMethod,
+      eventTimeIso: eventTimeIsoForKey,
     });
     computedUniqueKey = uniqueKey;
 

@@ -1,9 +1,11 @@
-﻿const express = require('express');
+const express = require('express');
 
 const config = require('../config/env');
 const { login, me, logout } = require('../controllers/authController');
 const { requireAuth } = require('../middlewares/authMiddleware');
 const { createRateLimiter } = require('../middlewares/rateLimitMiddleware');
+const { validate } = require('../middlewares/validateMiddleware');
+const { loginSchema } = require('../validation/schemas');
 const { asyncHandler } = require('../utils/asyncHandler');
 
 const router = express.Router();
@@ -15,7 +17,7 @@ const authLimiter = createRateLimiter({
   keyGenerator: (req) => req.ip,
 });
 
-router.post('/login', authLimiter, asyncHandler(login));
+router.post('/login', authLimiter, validate({ body: loginSchema }), asyncHandler(login));
 router.get('/me', requireAuth, me);
 router.post('/logout', requireAuth, logout);
 

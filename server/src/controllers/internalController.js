@@ -1,4 +1,4 @@
-﻿const { runDiarySyncOnce } = require('../services/diarySyncService');
+const { runDiarySyncOnce } = require('../services/diarySyncService');
 
 async function runDiarySyncNow(req, res) {
   const summary = await runDiarySyncOnce();

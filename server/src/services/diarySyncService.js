@@ -1,4 +1,4 @@
-﻿const config = require('../config/env');
+const config = require('../config/env');
 const pool = require('../db/pool');
 const { sendAttendance } = require('./diaryService');
 const { logError, logInfo, logWarn } = require('../utils/logger');

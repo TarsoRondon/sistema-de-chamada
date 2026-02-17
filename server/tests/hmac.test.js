@@ -1,4 +1,4 @@
-﻿const { computeHmacSha256, verifyHmac, safeEqual } = require('../src/utils/hmac');
+const { computeHmacSha256, verifyHmac, safeEqual } = require('../src/utils/hmac');
 
 describe('HMAC utils', () => {
   test('compute and verify signature', () => {

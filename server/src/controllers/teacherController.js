@@ -1,4 +1,4 @@
-﻿const {
+const {
   openClassSession,
   listTodayClassSessions,
   listTeacherTurmas,
@@ -16,13 +16,6 @@ async function createClassSession(req, res) {
     hora_inicio: horaInicio,
     hora_fim: horaFim,
   } = req.body;
-
-  if (!turmaId || !horaInicio || !horaFim) {
-    return res.status(400).json({
-      ok: false,
-      error: 'Campos obrigatorios: turma_id, hora_inicio e hora_fim',
-    });
-  }
 
   const sessionId = await openClassSession({
     organizationId: req.user.organizationId,
@@ -57,7 +50,7 @@ async function getTurmas(req, res) {
 async function getSessionAttendance(req, res) {
   const attendance = await getClassSessionAttendance({
     organizationId: req.user.organizationId,
-    classSessionId: Number(req.params.id),
+    classSessionId: req.params.id,
   });
 
   return res.json({ ok: true, data: attendance });
@@ -73,17 +66,10 @@ async function postManualAttendance(req, res) {
     timestamp,
   } = req.body;
 
-  if (!classSessionId || !status || (!studentId && !studentMatricula)) {
-    return res.status(400).json({
-      ok: false,
-      error: 'Campos obrigatorios: class_session_id, status e (student_id ou student_matricula)',
-    });
-  }
-
   const result = await createManualAttendance({
     organizationId: req.user.organizationId,
-    classSessionId: Number(classSessionId),
-    studentId: studentId ? Number(studentId) : null,
+    classSessionId,
+    studentId: studentId || null,
     studentMatricula,
     status,
     justificativa,

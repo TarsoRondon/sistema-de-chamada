@@ -1,4 +1,4 @@
-﻿(function setupUi(global) {
+(function setupUi(global) {
   function ensureToastWrap() {
     let wrap = document.querySelector('.toast-wrap');
     if (!wrap) {

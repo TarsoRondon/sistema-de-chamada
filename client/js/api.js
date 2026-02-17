@@ -1,4 +1,4 @@
-﻿(function setupApi(global) {
+(function setupApi(global) {
   async function request(path, options = {}) {
     const controller = new AbortController();
     const timeoutMs = Number(options.timeoutMs || 15000);

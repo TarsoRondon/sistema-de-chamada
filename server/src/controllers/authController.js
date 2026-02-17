@@ -1,13 +1,9 @@
-﻿const config = require('../config/env');
+const config = require('../config/env');
 const { loginWithEmailAndPassword } = require('../services/authService');
 const { getAuthCookieOptions } = require('../utils/cookies');
 
 async function login(req, res) {
   const { email, password, organization_id: organizationId } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ ok: false, error: 'email e password sao obrigatorios' });
-  }
 
   const { token, user } = await loginWithEmailAndPassword({
     email,

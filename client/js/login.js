@@ -1,4 +1,4 @@
-﻿(function initLoginPage() {
+(function initLoginPage() {
   const form = document.getElementById('login-form');
   if (!form) return;
 

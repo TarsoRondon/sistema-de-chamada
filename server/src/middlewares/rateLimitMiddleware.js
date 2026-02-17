@@ -1,4 +1,6 @@
-﻿function createRateLimiter({
+const { sendError } = require('../utils/errorResponse');
+
+function createRateLimiter({
   windowMs,
   max,
   keyGenerator,
@@ -35,10 +37,13 @@
     if (current.count > max) {
       const retryAfterSeconds = Math.ceil((windowMs - (now - current.windowStart)) / 1000);
       res.setHeader('Retry-After', String(Math.max(retryAfterSeconds, 1)));
-      return res.status(429).json({
-        ok: false,
-        error: 'Muitas requisicoes. Tente novamente em alguns segundos.',
-      });
+      return sendError(
+        res,
+        req,
+        429,
+        'RATE_LIMIT_EXCEEDED',
+        'Muitas requisicoes. Tente novamente em alguns segundos.'
+      );
     }
 
     return next();

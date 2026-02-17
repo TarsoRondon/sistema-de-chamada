@@ -1,4 +1,4 @@
-﻿(function initAdminPage() {
+(function initAdminPage() {
   const page = document.getElementById('admin-tabs');
   if (!page) return;
 

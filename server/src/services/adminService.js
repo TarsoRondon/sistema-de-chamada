@@ -1,8 +1,9 @@
-﻿const crypto = require('crypto');
+const crypto = require('crypto');
 
 const pool = require('../db/pool');
 const { createDevice, listDevices } = require('./deviceService');
 const { processIncomingEvent } = require('./attendanceService');
+const { importDigitalCsvContent } = require('./digitalCsvImportService');
 
 async function listStudents({ organizationId, turmaId, nome, matricula }) {
   const where = ['s.organization_id = ?'];
@@ -224,6 +225,18 @@ async function createKioskEvent({ organizationId, studentMatricula, eventType, m
   });
 }
 
+async function importDigitalCsvBuffer({ sourceFile, fileBuffer }) {
+  const connection = await pool.getConnection();
+  try {
+    return await importDigitalCsvContent(connection, {
+      sourceFile,
+      content: fileBuffer.toString('utf8'),
+    });
+  } finally {
+    connection.release();
+  }
+}
+
 module.exports = {
   listStudents,
   createStudentRecord,
@@ -234,4 +247,5 @@ module.exports = {
   listDevicesByOrganization,
   listAdminLogs,
   createKioskEvent,
+  importDigitalCsvBuffer,
 };

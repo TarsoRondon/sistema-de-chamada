@@ -1,4 +1,4 @@
-﻿# Local Agent (Node)
+# Local Agent (Node)
 
 Modo de uso rapido:
 

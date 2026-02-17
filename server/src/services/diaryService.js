@@ -1,4 +1,4 @@
-﻿const config = require('../config/env');
+const config = require('../config/env');
 const { logError, logInfo } = require('../utils/logger');
 
 function buildDiaryUrl() {

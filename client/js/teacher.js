@@ -1,4 +1,4 @@
-﻿(function initTeacherPage() {
+(function initTeacherPage() {
   const table = document.getElementById('today-sessions-body');
   if (!table) return;
 

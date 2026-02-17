@@ -1,4 +1,4 @@
-﻿jest.mock('../src/middlewares/deviceAuthMiddleware', () => ({
+jest.mock('../src/middlewares/deviceAuthMiddleware', () => ({
   deviceAuthMiddleware: (req, res, next) => {
     req.device = {
       id: 1,

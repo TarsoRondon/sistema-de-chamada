@@ -1,42 +1,94 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login | Marca-Ponto Escolar</title>
+    <title>Login | Sistema de Chamada</title>
+    <link rel="icon" href="/assets/favicon.ico" />
+    <meta name="theme-color" content="#0a5d54" />
+    <link rel="apple-touch-icon" href="/assets/icon-192.png" />
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <div class="gov-strip">Sistema Oficial de Gestao Escolar | Controle de Frequencia</div>
-    <main class="auth-page">
-      <div class="auth-card">
-        <div class="brand"><span class="brand-dot"></span> Marca-Ponto Escolar</div>
-        <h1>Acesso institucional</h1>
-        <p class="subtitle">Login de administrador e professor com sessao protegida.</p>
+    <div class="page-shell">
+      <div class="gov-strip">Sistema Institucional de Frequencia Escolar</div>
 
-        <form id="login-form" class="grid">
-          <div>
-            <label for="email">Email</label>
-            <input id="email" type="email" placeholder="professor@escola.com" required />
-          </div>
+      <main class="auth-layout auth-layout-pro">
+        <section class="auth-hero" aria-label="Apresentacao do sistema">
+          <div class="auth-hero-badge">Ambiente protegido</div>
+          <h1 class="auth-hero-title">Controle de chamada escolar em padrao institucional</h1>
+          <p class="auth-hero-text">
+            Registro de presenca integrado ao diario do professor, com trilha de auditoria e sincronizacao segura.
+          </p>
+          <ul class="auth-hero-list">
+            <li>Autenticacao por perfil (ADMIN e TEACHER)</li>
+            <li>Eventos com assinatura HMAC por dispositivo</li>
+            <li>Fila de sincronizacao com retry automatico</li>
+          </ul>
+        </section>
 
-          <div>
-            <label for="password">Senha</label>
-            <input id="password" type="password" placeholder="********" required />
-          </div>
+        <section class="auth-card auth-card-pro">
+          <header class="auth-head">
+            <img src="/assets/logo.svg" alt="Logo do sistema" />
+            <div>
+              <h2 class="auth-title">Sistema de Chamada</h2>
+              <p class="auth-subtitle">Acesso para administrador e professor</p>
+            </div>
+          </header>
 
-          <div>
-            <label for="organization">ID da organizacao (opcional)</label>
-            <input id="organization" type="number" placeholder="1" />
-          </div>
+          <form id="login-form" class="form-grid" novalidate>
+            <div>
+              <label for="email">Email institucional</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="professor@escola.com"
+                autocomplete="email"
+                required
+              />
+              <div class="field-error" data-error-for="email"></div>
+            </div>
 
-          <button class="btn-primary" type="submit">Entrar</button>
-        </form>
-      </div>
-    </main>
+            <div>
+              <label for="password">Senha</label>
+              <div class="password-wrap">
+                <input id="password" name="password" type="password" autocomplete="current-password" required />
+                <button id="toggle-password" class="password-toggle" type="button">Mostrar</button>
+              </div>
+              <div class="field-error" data-error-for="password"></div>
+              <small id="capslock-warning" class="form-hint hidden">Caps Lock ativado.</small>
+            </div>
 
-    <script src="/js/api.js"></script>
-    <script src="/js/ui.js"></script>
-    <script src="/js/login.js"></script>
+            <div>
+              <label for="organization">Organizacao (opcional)</label>
+              <input id="organization" name="organization" type="number" placeholder="Ex.: 1" min="1" />
+              <small class="form-hint">Use apenas se sua escola utilizar mais de uma organizacao.</small>
+            </div>
+
+            <div class="remember-row">
+              <label><input id="remember-email" type="checkbox" /> Lembrar email neste dispositivo</label>
+            </div>
+
+            <button class="btn btn-primary" type="submit">Entrar</button>
+
+            <div class="auth-meta-row">
+              <span class="auth-security-pill">Login com cookie httpOnly</span>
+              <a href="mailto:suporte@sistema.local">Suporte tecnico</a>
+            </div>
+          </form>
+        </section>
+      </main>
+
+      <footer data-app-footer></footer>
+    </div>
+
+    <script src="/js/core/api.js"></script>
+    <script src="/js/core/toast.js"></script>
+    <script src="/js/core/modal.js"></script>
+    <script src="/js/core/format.js"></script>
+    <script src="/js/core/auth.js"></script>
+    <script src="/js/components/footer.js"></script>
+    <script src="/js/pages/login.js"></script>
   </body>
 </html>

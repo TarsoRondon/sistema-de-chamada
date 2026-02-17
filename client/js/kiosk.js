@@ -1,4 +1,4 @@
-﻿(function initKioskPage() {
+(function initKioskPage() {
   const feed = document.getElementById('kiosk-feed');
   if (!feed) return;
 

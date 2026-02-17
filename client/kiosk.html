@@ -1,59 +1,79 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Totem | Marca-Ponto Escolar</title>
+    <title>Totem | Sistema de Chamada</title>
+    <link rel="icon" href="/assets/favicon.ico" />
+    <meta name="theme-color" content="#0a5d54" />
+    <link rel="apple-touch-icon" href="/assets/icon-192.png" />
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <div class="gov-strip">Totem Oficial de Contingencia | Registro Manual</div>
-    <main class="page">
-      <section class="topbar">
-        <div>
-          <div class="title">Modo Totem (QR/Manual)</div>
-          <div class="meta">Uso administrativo para contingencia sem leitor fisico.</div>
-        </div>
-        <div class="toolbar">
-          <a class="btn-secondary" href="/admin.html">Voltar ao admin</a>
-          <button id="kiosk-logout" class="btn-danger" type="button">Encerrar sessao</button>
-        </div>
-      </section>
+    <div class="page-shell" data-page="kiosk">
+      <div class="gov-strip">Modo Totem • Contingencia para entrada e saida</div>
 
-      <section class="cards">
-        <article class="card">
-          <h3>Registrar evento</h3>
-          <form id="kiosk-form" class="grid">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <div class="brand">
+            <img class="brand-logo" src="/assets/logo.svg" alt="Logo do sistema" />
             <div>
-              <label>Matricula</label>
-              <input id="kiosk-matricula" placeholder="2025001" required />
+              <div class="brand-title">Totem de Registro</div>
+              <div class="brand-subtitle">Operacao local para portaria e contingencia</div>
             </div>
+          </div>
 
-            <div class="grid cols-2">
-              <button class="btn-primary" data-event="IN" type="button" id="kiosk-in">Entrada (IN)</button>
-              <button class="btn-secondary" data-event="OUT" type="button" id="kiosk-out">Saida (OUT)</button>
-            </div>
+          <div class="toolbar">
+            <a class="btn btn-secondary" href="/admin.html">Voltar ao admin</a>
+            <button id="kiosk-logout" class="btn btn-danger" type="button">Sair</button>
+          </div>
+        </div>
+      </header>
 
+      <main class="kiosk-layout">
+        <section class="card kiosk-panel">
+          <h2 class="card-title">Registrar evento manual</h2>
+          <form id="kiosk-form" class="form-grid">
             <div>
-              <label>Metodo</label>
+              <label for="kiosk-matricula">Matricula</label>
+              <input id="kiosk-matricula" placeholder="2025001" autocomplete="off" />
+            </div>
+            <div>
+              <label for="kiosk-method">Metodo</label>
               <select id="kiosk-method">
                 <option value="MANUAL">MANUAL</option>
                 <option value="QR">QR</option>
                 <option value="RFID">RFID</option>
               </select>
             </div>
+            <div>
+              <label for="kiosk-reason">Motivo (opcional)</label>
+              <input id="kiosk-reason" placeholder="Contingencia de leitor" />
+            </div>
+
+            <div class="kiosk-actions">
+              <button id="kiosk-in" class="btn btn-primary" type="button">Entrada (IN)</button>
+              <button id="kiosk-out" class="btn btn-secondary" type="button">Saida (OUT)</button>
+            </div>
           </form>
-        </article>
+        </section>
 
-        <article class="card">
-          <h3>Ultimos eventos</h3>
-          <div class="feed-list" id="kiosk-feed"></div>
-        </article>
-      </section>
-    </main>
+        <section class="card">
+          <h2 class="card-title">Ultimos eventos</h2>
+          <div id="kiosk-feed" class="feed-list"></div>
+        </section>
+      </main>
 
-    <script src="/js/api.js"></script>
-    <script src="/js/ui.js"></script>
-    <script src="/js/kiosk.js"></script>
+      <footer data-app-footer></footer>
+    </div>
+
+    <script src="/js/core/api.js"></script>
+    <script src="/js/core/toast.js"></script>
+    <script src="/js/core/modal.js"></script>
+    <script src="/js/core/format.js"></script>
+    <script src="/js/core/auth.js"></script>
+    <script src="/js/components/badges.js"></script>
+    <script src="/js/components/footer.js"></script>
+    <script src="/js/pages/kiosk.js"></script>
   </body>
 </html>

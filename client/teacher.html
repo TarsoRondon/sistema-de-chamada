@@ -1,156 +1,191 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Professor | Diario Integrado</title>
+    <title>Professor | Sistema de Chamada</title>
+    <link rel="icon" href="/assets/favicon.ico" />
+    <meta name="theme-color" content="#0a5d54" />
+    <link rel="apple-touch-icon" href="/assets/icon-192.png" />
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <div class="gov-strip">Diario Oficial do Professor | Controle de Presenca</div>
-    <main class="page">
-      <section class="topbar">
-        <div>
-          <div class="title">Diario do Professor</div>
-          <div class="meta" id="teacher-user-meta">Carregando...</div>
-        </div>
-        <div class="toolbar">
-          <a class="btn-secondary" href="/admin.html">Painel Admin</a>
-          <button id="teacher-logout" class="btn-danger" type="button">Encerrar sessao</button>
-        </div>
-      </section>
+    <div class="page-shell" data-page="teacher">
+      <div class="gov-strip">Diario do Professor • Frequencia em tempo quase real</div>
 
-      <section class="cards">
-        <article class="card">
-          <h3>Abrir aula</h3>
-          <form id="open-session-form" class="grid">
-            <div class="grid cols-2">
-              <div>
-                <label>Turma</label>
-                <select id="open-session-turma" required></select>
-              </div>
-              <div>
-                <label>Disciplina ID (opcional)</label>
-                <input id="open-session-subject" type="number" />
-              </div>
-            </div>
-            <div class="grid cols-2">
-              <div>
-                <label>Hora inicio</label>
-                <input id="open-session-start" type="time" required />
-              </div>
-              <div>
-                <label>Hora fim</label>
-                <input id="open-session-end" type="time" required />
-              </div>
-            </div>
-            <button class="btn-primary" type="submit">Abrir aula</button>
-          </form>
-        </article>
-
-        <article class="card">
-          <h3>Resumo da sessao selecionada</h3>
-          <div class="grid cols-2">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <div class="brand">
+            <img class="brand-logo" src="/assets/logo.svg" alt="Logo do sistema" />
             <div>
-              <div class="subtitle">Presentes</div>
-              <div class="kpi" id="kpi-presente">0</div>
-            </div>
-            <div>
-              <div class="subtitle">Atrasados</div>
-              <div class="kpi" id="kpi-atrasado">0</div>
-            </div>
-            <div>
-              <div class="subtitle">Ausentes</div>
-              <div class="kpi" id="kpi-ausente">0</div>
-            </div>
-            <div>
-              <div class="subtitle">Saiu</div>
-              <div class="kpi" id="kpi-saiu">0</div>
+              <div class="brand-title">Diario Integrado</div>
+              <div class="brand-subtitle" id="teacher-user-meta">Carregando sessao...</div>
             </div>
           </div>
-        </article>
-      </section>
 
-      <section class="cards">
-        <article class="card">
           <div class="toolbar">
-            <button id="btn-refresh-sessions" class="btn-secondary" type="button">Atualizar aulas de hoje</button>
+            <a class="btn btn-secondary" href="/admin.html">Admin</a>
+            <button id="teacher-logout" class="btn btn-danger" type="button">Sair</button>
           </div>
-          <h3>Aulas de hoje</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Turma</th>
-                <th>Horario</th>
-                <th>Acao</th>
-              </tr>
-            </thead>
-            <tbody id="today-sessions-body"></tbody>
-          </table>
-        </article>
+        </div>
+      </header>
 
-        <article class="card">
-          <h3>Correcao manual</h3>
-          <form id="manual-attendance-form" class="grid">
-            <div class="grid cols-2">
+      <main class="layout-single">
+        <section class="cards">
+          <article class="card">
+            <h2 class="card-title">Abrir aula</h2>
+            <form id="open-session-form" class="form-grid">
+              <div class="form-grid cols-2">
+                <div>
+                  <label for="open-session-turma">Turma</label>
+                  <select id="open-session-turma" required></select>
+                </div>
+                <div>
+                  <label for="open-session-subject">Subject ID (opcional)</label>
+                  <input id="open-session-subject" type="number" />
+                </div>
+              </div>
+
+              <div class="form-grid cols-2">
+                <div>
+                  <label for="open-session-date">Data da aula (opcional)</label>
+                  <input id="open-session-date" type="date" />
+                </div>
+                <div></div>
+              </div>
+
+              <div class="form-grid cols-2">
+                <div>
+                  <label for="open-session-start">Hora inicio</label>
+                  <input id="open-session-start" type="time" required />
+                </div>
+                <div>
+                  <label for="open-session-end">Hora fim</label>
+                  <input id="open-session-end" type="time" required />
+                </div>
+              </div>
+              <button class="btn btn-primary" type="submit">Abrir aula</button>
+            </form>
+          </article>
+
+          <article class="card">
+            <h2 class="card-title">Resumo da sessao selecionada</h2>
+            <div class="cards">
               <div>
-                <label>ID da sessao</label>
-                <input id="manual-session-id" type="number" required />
+                <div class="kpi-label">Presentes</div>
+                <div class="kpi-value" id="kpi-presente">0</div>
               </div>
               <div>
-                <label>Matricula do aluno</label>
-                <input id="manual-matricula" required />
+                <div class="kpi-label">Atrasados</div>
+                <div class="kpi-value" id="kpi-atrasado">0</div>
+              </div>
+              <div>
+                <div class="kpi-label">Ausentes</div>
+                <div class="kpi-value" id="kpi-ausente">0</div>
+              </div>
+              <div>
+                <div class="kpi-label">Saiu</div>
+                <div class="kpi-value" id="kpi-saiu">0</div>
               </div>
             </div>
-            <div class="grid cols-2">
-              <div>
-                <label>Status</label>
-                <select id="manual-status" required>
-                  <option value="PRESENT">PRESENT</option>
-                  <option value="LATE">LATE</option>
-                  <option value="LEFT">LEFT</option>
-                </select>
-              </div>
-              <div>
-                <label>Justificativa</label>
-                <input id="manual-justification" required />
-              </div>
+          </article>
+        </section>
+
+        <section class="cards" style="margin-top: 12px">
+          <article class="card table-card">
+            <div class="toolbar">
+              <button id="btn-refresh-sessions" class="btn btn-secondary" type="button">Atualizar aulas de hoje</button>
             </div>
-            <button class="btn-primary" type="submit">Salvar ajuste</button>
-          </form>
-        </article>
-      </section>
+            <h2 class="card-title">Aulas de hoje</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Turma</th>
+                    <th>Horario</th>
+                    <th>Acao</th>
+                  </tr>
+                </thead>
+                <tbody id="today-sessions-body"></tbody>
+              </table>
+            </div>
+          </article>
 
-      <section class="cards">
-        <article class="card">
-          <h3>Presenca da sessao</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Matricula</th>
-                <th>Aluno</th>
-                <th>Primeira entrada</th>
-                <th>Ultima saida</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="attendance-table-body"></tbody>
-          </table>
-        </article>
+          <article class="card">
+            <h2 class="card-title">Correcao manual</h2>
+            <form id="manual-attendance-form" class="form-grid">
+              <div class="form-grid cols-2">
+                <div>
+                  <label for="manual-session-id">ID da sessao</label>
+                  <input id="manual-session-id" type="number" required />
+                </div>
+                <div>
+                  <label for="manual-matricula">Matricula</label>
+                  <input id="manual-matricula" required />
+                </div>
+              </div>
 
-        <article class="card">
-          <div class="toolbar">
-            <button id="btn-refresh-feed" class="btn-secondary" type="button">Atualizar feed</button>
-          </div>
-          <h3>Feed ao vivo</h3>
-          <div class="feed-list" id="live-feed-list"></div>
-        </article>
-      </section>
-    </main>
+              <div class="form-grid cols-2">
+                <div>
+                  <label for="manual-status">Status</label>
+                  <select id="manual-status" required>
+                    <option value="PRESENT">PRESENT</option>
+                    <option value="LATE">LATE</option>
+                    <option value="LEFT">LEFT</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="manual-justification">Justificativa</label>
+                  <input id="manual-justification" required />
+                </div>
+              </div>
 
-    <script src="/js/api.js"></script>
-    <script src="/js/ui.js"></script>
-    <script src="/js/teacher.js"></script>
+              <button class="btn btn-primary" type="submit">Aplicar ajuste</button>
+            </form>
+          </article>
+        </section>
+
+        <section class="cards" style="margin-top: 12px">
+          <article class="card table-card">
+            <h2 class="card-title">Frequencia da sessao</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Matricula</th>
+                    <th>Aluno</th>
+                    <th>Primeira entrada</th>
+                    <th>Ultima saida</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="attendance-table-body"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="toolbar">
+              <button id="btn-refresh-feed" class="btn btn-secondary" type="button">Atualizar feed</button>
+            </div>
+            <h2 class="card-title">Feed ao vivo</h2>
+            <div class="feed-list" id="live-feed-list"></div>
+          </article>
+        </section>
+      </main>
+
+      <footer data-app-footer></footer>
+    </div>
+
+    <script src="/js/core/api.js"></script>
+    <script src="/js/core/toast.js"></script>
+    <script src="/js/core/modal.js"></script>
+    <script src="/js/core/format.js"></script>
+    <script src="/js/core/auth.js"></script>
+    <script src="/js/components/badges.js"></script>
+    <script src="/js/components/table.js"></script>
+    <script src="/js/components/footer.js"></script>
+    <script src="/js/pages/teacher.js"></script>
   </body>
 </html>

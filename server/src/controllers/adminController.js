@@ -1,4 +1,4 @@
-﻿const {
+const {
   listStudents,
   createStudentRecord,
   updateStudentRecord,
@@ -8,7 +8,9 @@
   listDevicesByOrganization,
   listAdminLogs,
   createKioskEvent,
+  importDigitalCsvBuffer,
 } = require('../services/adminService');
+const { sendError } = require('../utils/errorResponse');
 
 async function getStudents(req, res) {
   const students = await listStudents({
@@ -24,7 +26,7 @@ async function getStudents(req, res) {
 async function createStudent(req, res) {
   const { matricula, nome, turma_id: turmaId, status } = req.body;
   if (!matricula || !nome || !turmaId) {
-    return res.status(400).json({ ok: false, error: 'matricula, nome e turma_id sao obrigatorios' });
+    return sendError(res, req, 400, 'VALIDATION_ERROR', 'matricula, nome e turma_id sao obrigatorios');
   }
 
   const studentId = await createStudentRecord({
@@ -49,7 +51,7 @@ async function updateStudent(req, res) {
   });
 
   if (!affectedRows) {
-    return res.status(404).json({ ok: false, error: 'Aluno nao encontrado' });
+    return sendError(res, req, 404, 'NOT_FOUND', 'Aluno nao encontrado');
   }
 
   return res.json({ ok: true });
@@ -63,7 +65,7 @@ async function getTurmas(req, res) {
 async function createTurma(req, res) {
   const { nome, turno } = req.body;
   if (!nome || !turno) {
-    return res.status(400).json({ ok: false, error: 'nome e turno sao obrigatorios' });
+    return sendError(res, req, 400, 'VALIDATION_ERROR', 'nome e turno sao obrigatorios');
   }
 
   const turmaId = await createTurmaRecord({
@@ -84,7 +86,7 @@ async function createDevice(req, res) {
   const { device_code: deviceCode, local, secret } = req.body;
 
   if (!deviceCode || !local) {
-    return res.status(400).json({ ok: false, error: 'device_code e local sao obrigatorios' });
+    return sendError(res, req, 400, 'VALIDATION_ERROR', 'device_code e local sao obrigatorios');
   }
 
   const device = await createDeviceRecord({
@@ -105,7 +107,7 @@ async function getLogs(req, res) {
 async function postKioskEvent(req, res) {
   const { student_matricula: studentMatricula, event_type: eventType, method } = req.body;
   if (!studentMatricula || !eventType) {
-    return res.status(400).json({ ok: false, error: 'student_matricula e event_type sao obrigatorios' });
+    return sendError(res, req, 400, 'VALIDATION_ERROR', 'student_matricula e event_type sao obrigatorios');
   }
 
   const result = await createKioskEvent({
@@ -121,10 +123,27 @@ async function postKioskEvent(req, res) {
   });
 
   if (!result.ok) {
-    return res.status(409).json({ ok: false, error: result.flowNote || 'Evento rejeitado', data: result });
+    return sendError(res, req, 409, 'FLOW_INVALID', result.flowNote || 'Evento rejeitado', result);
   }
 
   return res.json({ ok: true, data: result });
+}
+
+async function importDigitalCsv(req, res) {
+  if (!req.file) {
+    return sendError(res, req, 400, 'VALIDATION_ERROR', 'Arquivo CSV obrigatorio (campo: file)');
+  }
+
+  if (!/\.csv$/i.test(req.file.originalname || '')) {
+    return sendError(res, req, 400, 'VALIDATION_ERROR', 'Arquivo deve ter extensao .csv');
+  }
+
+  const summary = await importDigitalCsvBuffer({
+    sourceFile: req.file.originalname || 'upload.csv',
+    fileBuffer: req.file.buffer,
+  });
+
+  return res.status(201).json({ ok: true, data: summary });
 }
 
 module.exports = {
@@ -137,4 +156,5 @@ module.exports = {
   createDevice,
   getLogs,
   postKioskEvent,
+  importDigitalCsv,
 };

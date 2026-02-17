@@ -1,4 +1,4 @@
-﻿const pool = require('../db/pool');
+const pool = require('../db/pool');
 const { processIncomingEvent } = require('./attendanceService');
 
 const MANUAL_STATUS_VALUES = new Set(['PRESENT', 'LATE', 'LEFT']);

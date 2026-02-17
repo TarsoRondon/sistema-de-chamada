@@ -1,20 +1,25 @@
-﻿# Sistema de Entrada/Saida Escolar + Diario do Professor
+# Sistema de Chamada Escolar
 
-Projeto full-stack (Node/Express + MySQL + frontend puro) para registro de `IN/OUT` de alunos com dois modos de captura:
+Projeto full-stack para entrada/saida de alunos com integracao ao diario do professor.
 
-1. `DEVICE POST MODE`: dispositivo envia direto para `POST /api/device/events` com HMAC.
-2. `LOCAL AGENT MODE`: script Node (`agent/localAgent.js`) roda no PC do leitor e faz POST na API.
+- Backend: Node.js + Express + MySQL (`school_attendance`)
+- Frontend: HTML/CSS/JS puro
+- Captura de eventos:
+  - `DEVICE POST MODE` (`POST /api/device/events` com HMAC)
+  - `LOCAL AGENT MODE` (`agent/localAgent.js`)
 
-## Padrao profissional aplicado
+## UI Profissional (client)
 
-- Configuracao centralizada e validada em `server/src/config/env.js`
-- Seguranca HTTP com `helmet` + compressao de resposta
-- Rate limiting nas rotas de login, device events e rotas internas
-- Endpoint de sessao `GET /api/auth/me` para o frontend validar role
-- Health checks separados:
-  - `GET /health/live` (liveness)
-  - `GET /health/ready` (readiness + DB)
-- Shutdown gracioso do servidor (SIGINT/SIGTERM)
+- Layout padronizado: topbar + container + footer em paginas logadas
+- Tema institucional (teal + cinza + branco), fonte Inter, componentes reutilizaveis
+- Footer unificado com status da API (`/health/ready`)
+- Favicon e logo centralizados em `client/assets`
+
+### Troca de identidade visual
+
+- Logo: `client/assets/logo.svg`
+- Favicon: `client/assets/favicon.ico`
+- Icone mobile: `client/assets/icon-192.png`
 
 ## Estrutura
 
@@ -27,42 +32,31 @@ Projeto full-stack (Node/Express + MySQL + frontend puro) para registro de `IN/O
     /middlewares
     /utils
     /db
+  /scripts
   server.js
   mockDiaryServer.js
   .env.example
 /client
-  login.html
-  admin.html
-  teacher.html
-  kiosk.html
-  /css/styles.css
-  /js/*.js
+  /assets
+  /css
+  /js
+    /core
+    /components
+    /pages
 /agent
-  localAgent.js
-  README.md
 ```
-
-## Requisitos
-
-- Node.js 18+
-- MySQL 8+
 
 ## Setup local
 
-1. Instale dependencias do backend:
+1. Backend:
 
 ```bash
 cd server
 npm install
-```
-
-2. Configure variaveis de ambiente:
-
-```bash
 cp .env.example .env
 ```
 
-3. Crie o banco e execute schema + seed:
+2. Banco:
 
 ```bash
 mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS school_attendance CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
@@ -70,132 +64,115 @@ mysql -u root -p school_attendance < src/db/schema.sql
 mysql -u root -p school_attendance < src/db/seed.sql
 ```
 
-4. Rode o backend principal:
+3. Rodar API:
 
 ```bash
 npm run dev
 ```
 
-Se voce alterou `PORT` no `.env`, troque a porta nos exemplos abaixo.
-
-5. (Opcional) Rode o mock diary server para testes de integracao:
+4. (Opcional) mock do diario:
 
 ```bash
 npm run mock-diary
 ```
 
-A API fica em `http://localhost:3000` e o frontend em `http://localhost:3000/login.html`.
+5. Frontend:
+
+- Abra `http://localhost:PORT/login.html`
 
 ## Credenciais seed
 
 - Admin: `admin@escola.com` / `admin123`
 - Professor: `prof@escola.com` / `teacher123`
-- Device seed:
-  - `device_code`: `LEITOR-PORTARIA-01`
-  - `secret`: `secret-leitor-portaria-01`
+- Device seed: `LEITOR-PORTARIA-01` / `secret-leitor-portaria-01`
 
-## Worker de sincronizacao (diario)
+## Scripts uteis (server)
 
-- Roda automaticamente no backend a cada 1 minuto (`SYNC_INTERVAL_MS`).
-- Reprocessa itens `PENDING/ERROR` com `next_retry_at <= now`.
-- Backoff: `min(2^attempts, 30)` minutos.
-- Endpoint de execucao manual (dev/test):
-  - `POST /api/internal/diary-sync/run-once`
-  - Header alternativo: `x-internal-key: INTERNAL_API_KEY`.
+- `npm run dev`: API com nodemon
+- `npm run start`: API sem nodemon
+- `npm run mock-diary`: mock diary server
+- `npm run test`: testes Jest
+- `npm run import:digital-csv`: importa CSV de digital para tabela staging
+- `npm run sync:students-from-import`: sincroniza staging para `students`
+- `npm run repair:students-rename`: repara schema caso `students` tenha sido renomeada incorretamente
 
-## Mock diary server
+## Importacao CSV (estavel)
 
-- `POST /api/attendance`
-- `GET /api/attendance/logs`
-- `POST /api/fail-mode` com `{ "mode": "none|always|random" }`
-
-## Testes
-
-```bash
-cd server
-npm test
-```
-
-## Importacao do CSV de digital
-
-Tabela criada para esse arquivo: `importacao_digital_eventos`.
-
-Script SQL da tabela:
-- `server/src/db/importacao_digital_eventos.sql`
-
-Importador automatico (Node):
+Fluxo recomendado:
 
 ```bash
 cd server
 npm run import:digital-csv
-```
-
-Para informar outro caminho de CSV:
-
-```bash
-cd server
-node scripts/importDigitalCsv.js "C:\\caminho\\arquivo.csv"
-```
-
-Sincronizar alunos importados para a tabela oficial `students`:
-
-```bash
-cd server
 npm run sync:students-from-import
 ```
 
-Reparar schema caso a tabela `students` tenha sido renomeada/trocada por engano:
+Ou informando caminho customizado:
 
 ```bash
-cd server
-npm run repair:students-rename
+node scripts/importDigitalCsv.js "C:\\caminho\\arquivo.csv"
 ```
 
-## Exemplos de requisicoes (curl)
+Melhorias implementadas no importador:
 
-### 1) Login (professor/admin)
+- Detecta separador automaticamente (`;` ou `,`)
+- Aceita arquivos CRLF e LF
+- Normaliza `credential_code` removendo espacos
+- Ignora linhas incompletas e retorna preview de erros
+- Salva sempre `raw_line` e `row_hash` para rastreabilidade
 
-```bash
-curl -i -c cookies.txt -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"prof@escola.com","password":"teacher123","organization_id":1}'
+Tambem existe endpoint admin para upload:
+
+- `POST /api/admin/import/digital-csv` (`multipart/form-data`, campo `file`)
+
+## Troubleshooting
+
+1. Erro `No database selected` no Workbench:
+- Selecione o schema `school_attendance` ou execute `USE school_attendance;` antes dos `INSERT`.
+
+2. Porta MySQL diferente:
+- Ajuste `DB_PORT` no `.env` (ex.: `3308`).
+
+3. `secure-file-priv` / `local_infile` bloqueado:
+- Use o importador Node (`npm run import:digital-csv`) em vez de `LOAD DATA INFILE`.
+
+4. CSV nao importa corretamente:
+- Verifique se o arquivo esta em UTF-8 e se usa `;` ou `,` como separador.
+
+5. `EADDRINUSE` ao subir API:
+- Ja existe processo usando a porta. Mude `PORT` no `.env` ou encerre o processo atual.
+
+## Robustez implementada no backend
+
+- Validacao com Zod nas rotas principais:
+  - `POST /api/auth/login`
+  - `POST /api/device/events`
+  - `POST /api/teacher/class-sessions`
+  - `GET /api/teacher/class-sessions/:id/attendance`
+  - `POST /api/teacher/attendance/manual`
+- Erro padronizado com `requestId`:
+
+```json
+{
+  "ok": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Payload invalido"
+  },
+  "requestId": "..."
+}
 ```
 
-### 1.1) Ver sessao atual
+- Logs estruturados com `requestId`, `userId`, `role`, `deviceCode`, `statusCode` e `durationMs`
+- Rate limit em `device/events` por IP + `device_code`
+- Idempotencia forte para eventos (`organization + device + matricula + event_type + timestamp`)
+- Persistencia em UTC (pool MySQL com `timezone=Z`)
 
-```bash
-curl -b cookies.txt http://localhost:3000/api/auth/me
-```
+## Checklist de producao
 
-### 2) Abrir aula (teacher)
-
-```bash
-curl -b cookies.txt -X POST http://localhost:3000/api/teacher/class-sessions \
-  -H "Content-Type: application/json" \
-  -d '{"turma_id":1,"hora_inicio":"07:30:00","hora_fim":"11:30:00"}'
-```
-
-### 3) Consultar presenca da sessao
-
-```bash
-curl -b cookies.txt http://localhost:3000/api/teacher/class-sessions/1/attendance
-```
-
-### 4) Enviar evento do device (com assinatura HMAC)
-
-```bash
-BODY='{"student_matricula":"2025001","event_type":"IN","event_time":"2026-02-14T11:20:00-04:00","method":"RFID"}'
-SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac 'secret-leitor-portaria-01' | sed 's/^.* //')
-
-curl -X POST http://localhost:3000/api/device/events \
-  -H "Content-Type: application/json" \
-  -H "x-device-code: LEITOR-PORTARIA-01" \
-  -H "x-signature: $SIG" \
-  -d "$BODY"
-```
-
-### 5) Local Agent mode
-
-```bash
-node ../agent/localAgent.js --student_matricula 2025001 --event_type IN --method RFID --event_time 2026-02-14T11:20:00-04:00
-```
+1. Definir `JWT_SECRET` forte e unico.
+2. Ativar `COOKIE_SECURE=true` em HTTPS.
+3. Configurar `CORS_ALLOWED_ORIGINS` explicitamente.
+4. Rotacionar `DIARY_TOKEN` e `INTERNAL_API_KEY`.
+5. Ativar monitoramento dos logs estruturados.
+6. Validar politicas de backup do MySQL (schema + dados).
+7. Revisar limites de rate-limit conforme carga real.

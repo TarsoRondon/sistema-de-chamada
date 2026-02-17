@@ -1,4 +1,4 @@
-﻿const { logInfo } = require('../utils/logger');
+const { logInfo } = require('../utils/logger');
 
 function accessLogMiddleware(req, res, next) {
   const start = Date.now();
@@ -12,6 +12,8 @@ function accessLogMiddleware(req, res, next) {
       statusCode: res.statusCode,
       durationMs,
       userId: req.user?.id || null,
+      role: req.user?.role || null,
+      deviceCode: req.device?.device_code || req.headers['x-device-code'] || null,
       ip: req.ip,
     });
   });
